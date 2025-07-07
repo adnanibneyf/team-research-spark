@@ -5,8 +5,7 @@ import {
   Search, 
   Calendar,
   Plus,
-  ChevronDown,
-  ChevronUp
+  FolderOpen
 } from "lucide-react";
 import {
   Sidebar,
@@ -24,9 +23,18 @@ import {
 interface AppSidebarProps {
   activeView: string;
   setActiveView: (view: string) => void;
+  isProjectView?: boolean;
 }
 
-const navigationItems = [
+const personalNavigationItems = [
+  { id: "dashboard", title: "Dashboard", icon: Calendar },
+  { id: "literature", title: "Literature", icon: Book },
+  { id: "kanban", title: "Planning", icon: KanbanSquare },
+  { id: "ideas", title: "Idea Canvas", icon: Plus },
+  { id: "projects", title: "Projects", icon: FolderOpen },
+];
+
+const projectNavigationItems = [
   { id: "dashboard", title: "Dashboard", icon: Calendar },
   { id: "literature", title: "Literature", icon: Book },
   { id: "kanban", title: "Planning", icon: KanbanSquare },
@@ -34,20 +42,24 @@ const navigationItems = [
   { id: "team", title: "Team Hub", icon: Search },
 ];
 
-export function AppSidebar({ activeView, setActiveView }: AppSidebarProps) {
-  const { collapsed } = useSidebar();
+export function AppSidebar({ activeView, setActiveView, isProjectView = false }: AppSidebarProps) {
+  const { state } = useSidebar();
+  const isCollapsed = state === "collapsed";
+  const navigationItems = isProjectView ? projectNavigationItems : personalNavigationItems;
 
   return (
-    <Sidebar className={collapsed ? "w-14" : "w-64"} collapsible>
+    <Sidebar className={isCollapsed ? "w-14" : "w-64"} collapsible="icon">
       <div className="p-4 border-b bg-white">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
             <Book className="w-5 h-5 text-white" />
           </div>
-          {!collapsed && (
+          {!isCollapsed && (
             <div>
               <h1 className="font-bold text-lg text-gray-900">ResearchMate</h1>
-              <p className="text-xs text-gray-500">Smart Research Assistant</p>
+              <p className="text-xs text-gray-500">
+                {isProjectView ? "Project Dashboard" : "Personal Dashboard"}
+              </p>
             </div>
           )}
         </div>
@@ -56,7 +68,7 @@ export function AppSidebar({ activeView, setActiveView }: AppSidebarProps) {
       <SidebarContent className="bg-white">
         <SidebarGroup>
           <SidebarGroupLabel className="text-gray-600 font-medium">
-            {!collapsed && "Navigation"}
+            {!isCollapsed && "Navigation"}
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -71,7 +83,7 @@ export function AppSidebar({ activeView, setActiveView }: AppSidebarProps) {
                       className="w-full flex items-center gap-3 px-3 py-2"
                     >
                       <item.icon className="w-5 h-5" />
-                      {!collapsed && <span>{item.title}</span>}
+                      {!isCollapsed && <span>{item.title}</span>}
                     </button>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
