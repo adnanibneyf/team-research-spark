@@ -1,14 +1,18 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Book, Plus, ChevronDown } from "lucide-react";
+import { Search, Book, Plus, ChevronDown, MessageSquare, FileText } from "lucide-react";
+import { PaperNotes } from "./PaperNotes";
+import { PaperChat } from "./PaperChat";
 
 export function Literature() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedPaper, setSelectedPaper] = useState<number | null>(null);
+  const [showNotes, setShowNotes] = useState(false);
+  const [showChat, setShowChat] = useState(false);
 
   const papers = [
     {
@@ -20,7 +24,9 @@ export function Literature() {
       citations: 89234,
       status: "Read",
       tags: ["Transformers", "NLP", "Deep Learning"],
-      summary: "Introduced the Transformer architecture, revolutionizing sequence-to-sequence learning..."
+      summary: "Introduced the Transformer architecture, revolutionizing sequence-to-sequence learning...",
+      hasNotes: true,
+      noteCount: 5
     },
     {
       id: 2,
@@ -31,7 +37,9 @@ export function Literature() {
       citations: 67891,
       status: "Reading",
       tags: ["BERT", "NLP", "Pre-training"],
-      summary: "BERT obtains new state-of-the-art results on eleven natural language processing tasks..."
+      summary: "BERT obtains new state-of-the-art results on eleven natural language processing tasks...",
+      hasNotes: false,
+      noteCount: 0
     },
     {
       id: 3,
@@ -42,7 +50,9 @@ export function Literature() {
       citations: 45123,
       status: "To Read",
       tags: ["GPT", "Few-shot Learning", "Language Models"],
-      summary: "We train GPT-3, an autoregressive language model with 175 billion parameters..."
+      summary: "We train GPT-3, an autoregressive language model with 175 billion parameters...",
+      hasNotes: true,
+      noteCount: 2
     }
   ];
 
@@ -51,6 +61,18 @@ export function Literature() {
     paper.authors.toLowerCase().includes(searchQuery.toLowerCase()) ||
     paper.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
   );
+
+  const openNotes = (paperId: number) => {
+    setSelectedPaper(paperId);
+    setShowNotes(true);
+  };
+
+  const openChat = (paperId: number) => {
+    setSelectedPaper(paperId);
+    setShowChat(true);
+  };
+
+  const selectedPaperData = papers.find(p => p.id === selectedPaper);
 
   return (
     <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
@@ -114,6 +136,11 @@ export function Literature() {
                       }>
                         {paper.status}
                       </Badge>
+                      {paper.hasNotes && (
+                        <Badge variant="outline" className="text-xs">
+                          {paper.noteCount} notes
+                        </Badge>
+                      )}
                     </div>
                     
                     <p className="text-gray-600 mb-2">{paper.authors}</p>
@@ -140,6 +167,22 @@ export function Literature() {
                     <Button size="sm" variant="outline">
                       <Book className="w-4 h-4 mr-2" />
                       Read
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => openChat(paper.id)}
+                    >
+                      <MessageSquare className="w-4 h-4 mr-2" />
+                      AI Chat
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => openNotes(paper.id)}
+                    >
+                      <FileText className="w-4 h-4 mr-2" />
+                      Notes
                     </Button>
                     <Button size="sm" variant="outline">
                       AI Summary
@@ -181,6 +224,23 @@ export function Literature() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Modals */}
+      {showNotes && selectedPaperData && (
+        <PaperNotes
+          paperId={selectedPaperData.id}
+          paperTitle={selectedPaperData.title}
+          onClose={() => setShowNotes(false)}
+        />
+      )}
+
+      {showChat && selectedPaperData && (
+        <PaperChat
+          paperId={selectedPaperData.id}
+          paperTitle={selectedPaperData.title}
+          onClose={() => setShowChat(false)}
+        />
+      )}
     </div>
   );
 }

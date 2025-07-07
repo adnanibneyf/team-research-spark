@@ -1,10 +1,10 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Plus, Calendar, Book } from "lucide-react";
+import { TaskInteraction } from "./TaskInteraction";
 
 interface Task {
   id: string;
@@ -24,6 +24,9 @@ interface Column {
 }
 
 export function KanbanBoard() {
+  const [selectedTask, setSelectedTask] = useState<string | null>(null);
+  const [showTaskModal, setShowTaskModal] = useState(false);
+
   const [columns, setColumns] = useState<Column[]>([
     {
       id: "backlog",
@@ -110,6 +113,13 @@ export function KanbanBoard() {
     }
   };
 
+  const openTaskModal = (taskId: string) => {
+    setSelectedTask(taskId);
+    setShowTaskModal(true);
+  };
+
+  const selectedTaskData = columns.flatMap(col => col.tasks).find(task => task.id === selectedTask);
+
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
       {/* Header */}
@@ -145,6 +155,7 @@ export function KanbanBoard() {
                   <div
                     key={task.id}
                     className="p-4 bg-white border rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                    onClick={() => openTaskModal(task.id)}
                   >
                     <div className="flex items-start gap-2 mb-2">
                       <div className="text-gray-500 mt-1">
@@ -200,6 +211,15 @@ export function KanbanBoard() {
           </div>
         ))}
       </div>
+
+      {/* Task Modal */}
+      {showTaskModal && selectedTaskData && (
+        <TaskInteraction
+          taskId={selectedTaskData.id}
+          taskTitle={selectedTaskData.title}
+          onClose={() => setShowTaskModal(false)}
+        />
+      )}
     </div>
   );
 }
